@@ -22,6 +22,9 @@ module "eks" {
 
   subnet_ids = module.vpc.subnet_ids
   depends_on = [module.vpc]
+
+  capacity_type = var.capacity_type
+  disk_size     = var.disk_size
 }
 
 module "ecr" {
