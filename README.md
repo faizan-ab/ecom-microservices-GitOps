@@ -2,7 +2,7 @@
 
 A 7-service e-commerce application deployed on **AWS EKS** with a full GitOps delivery pipeline, observability stack, and an AI-powered SRE assistant that diagnoses production incidents using live logs, metrics, and cluster health data.
 
-[Architecture](#architecture) · [Highlights](#highlights) · [Tech Stack](#tech-stack) · [Quickstart](#quickstart) · [AIOps Assistant — Kira](#aiops-assistant--kira) · [Engineering Notes](#engineering-notes--known-limitations) · [Troubleshooting Log](#real-incidents--troubleshooting) · [Docs](#documentation)
+[Architecture](#architecture) · [Highlights](#highlights) · [Tech Stack](#tech-stack) · [Quickstart](#quickstart) · [Engineering Notes](#engineering-notes--known-limitations) · [Troubleshooting Log](#real-incidents--troubleshooting)
 
 ---
 
