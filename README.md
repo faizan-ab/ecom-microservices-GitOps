@@ -14,54 +14,86 @@ On top of that operational layer sits **Kira**, an AWS Bedrock-powered SRE agent
 
 ---
 
-## Architecture
+## 🏗️ Architecture
 
-```mermaid
-flowchart TB
-    subgraph Client
-        FE[React Frontend]
-    end
+### Architecture Diagram
+![Architecture](Screenshots/architecture.png)
 
-    subgraph Backend Services
-        GW[Gateway]
-        AUTH[Auth Service]
-        PROD[Product Service]
-        ORD[Order Service]
-        ORDS[Orders Service]
-        USR[User Service]
-    end
+```
+                                    👨‍💻 Developer
+                                          │
+                                          ▼
+                               GitHub Repository
+                                          │
+                          Push / Pull Request / Merge
+                                          │
+                                          ▼
+                              GitHub Actions CI/CD
+              ┌────────────────────────────────────────────┐
+              │                                            │
+              │ Build Docker Images                        │
+              │ Run Tests                                  │
+              │ Security Scan                              │
+              │ Push Images                                │
+              └────────────────────────────────────────────┘
+                                          │
+                                          ▼
+                               Amazon Elastic Container Registry
+                                         (ECR)
+                                          │
+                                          ▼
+                                   ArgoCD (GitOps)
+                              Watches Kubernetes Manifests
+                                          │
+                                          ▼
+                          Amazon EKS Kubernetes Cluster
+┌──────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                              │
+│   Frontend Deployment                                                                        │
+│          │                                                                                   │
+│          ▼                                                                                   │
+│    API Gateway Service                                                                       │
+│          │                                                                                   │
+│          ├──────────────► User Service                                                       │
+│          │                                                                                   │
+│          ├──────────────► Product Service                                                    │
+│          │                                                                                   │
+│          ├──────────────► Orders Service                                                     │
+│          │                                                                                   │
+│          └──────────────► Auth Service                                                       │
+│                                                                                              │
+│                          │                                                                   │
+│                          ▼                                                                   │
+│                    MySQL StatefulSet                                                         │
+│                                                                                              │
+└──────────────────────────────────────────────────────────────────────────────────────────────┘
+                                          │
+                                          ▼
+                         Prometheus + ServiceMonitor
+                                          │
+                                          ▼
+                                     Grafana Dashboard
+```
 
-    DB[(PostgreSQL)]
-    
-    subgraph Observability
-        PROM[Prometheus]
-        GRAF[Grafana]
-        CWL[CloudWatch Logs]
-    end
+###Infrastructure Layer
+```
+Terraform
+     │
+     ▼
+┌───────────────────────────────┐
+│ AWS Infrastructure            │
+│                               │
+│ • VPC                         │
+│ • Public / Private Subnets    │
+│ • Internet Gateway            │
+│ • NAT Gateway                 │
+│ • EKS Cluster                 │
+│ • Managed Node Group          │
+│ • ECR Repositories            │
+│ • IAM Roles                   │
+└───────────────────────────────┘
 
-    subgraph AIOps
-        KIRA[Bedrock Agent — Kira]
-        L1[Lambda: fetch_logs]
-        L2[Lambda: fetch_metrics]
-        L3[Lambda: fetch_health]
-    end
-
-    FE --> GW
-    GW --> AUTH
-    GW --> PROD
-    GW --> ORD
-    GW --> ORDS
-    GW --> USR
-    AUTH --> DB
-    PROD --> DB
-    ORD --> DB
-    ORDS --> DB
-    USR --> DB
-
-    Backend Services -.metrics.-> PROM
-    PROM --> GRAF
-    Backend Services -.logs.-> CWL
-
+```
 ```
 
 **Delivery pipeline:** `git push` → GitHub Actions builds & pushes images to ECR → manifest update commit → ArgoCD syncs to EKS.
